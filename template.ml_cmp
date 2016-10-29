@@ -1,0 +1,68 @@
+_style = verbatim('<style>','</style>')
+javascript = verbatim(script(type="text/javascript"))
+#---------------------  ..._test.html---------------   
+html:
+    head:
+        _style:
+            h1 {
+                color:red;
+            }
+        meta(charset='utf-8'):
+        script(src='ractive.min.js'):
+        javascript():
+            window._rcs_component = {};  //need to component register
+        script(src='template.js'):    //include generated .js
+
+    body:
+        h1:
+            "This is Header"
+        title:
+            "Welcome to my Web Page"
+        div(id = "container"):
+
+    javascript():
+            ractive = new  Ractive({
+                el : '#container',
+                template : '<div> component foo: <foo></div>',
+                components : {'foo' : _rcs_component.foo}
+            }) ;           
+#-------------------------  < TEMPLATES > ----------------------
+
+script(type='text/ractive',id="templ" ) :
+    css():
+        div {
+            color:blue;
+        }
+    div():
+        '{{name}}'
+
+#another template         
+script(type='text/ractive',id="templ_1" ) :
+    css():
+    head:
+        meta(charset='utf-8'):
+    div():
+       '{{message}}'
+    
+    
+  
+## !!!  @TMPL(templ),   @CSS(templ) will be replaced anywhere in < RS_SCRIPT > section !!!
+##  - don't write it in comments 
+#----------------------  < RS_SCRIPT > -------------------------
+@external
+class Ractive:
+    @staticmethod
+    def extend():
+        pass
+        
+def  main():
+    component_opt = {
+            #   @ TMPL(templ) - will be replaced with script body if `script(... id = 'templ')`
+            template   : @TMPL(templ),
+            #   @ CSS(templ) - will be replaced with  body of `css():` of  `script( ...id = 'templ'`
+            css : @CSS(templ),
+            data : {name : 'component_ml'}
+    }
+    foo =  Ractive.extend(component_opt)
+    window._rcs_component.foo = foo
+f= main()   
